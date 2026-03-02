@@ -296,6 +296,46 @@ Preprocess::process_cut_frame_pcl2(const sensor_msgs::msg::PointCloud2::UniquePt
                 pl_surf.points.push_back(added_pt);
             }
         }
+    } else if (lidar_type == MID360) {
+        pcl::PointCloud<livox_ros::LivoxPointXYZRTLT> pl_orig;
+        pcl::fromROSMsg(*msg, pl_orig);
+        int plsize = pl_orig.points.size();
+
+        pl_corn.reserve(plsize);
+        pl_surf.reserve(plsize);
+        pl_full.resize(plsize);
+        
+        uint valid_num = 0;
+        for (uint i = 1; i < plsize; i++) {
+            if ((pl_orig.points[i].line < N_SCANS) &&
+                ((pl_orig.points[i].tag & 0x30) == 0x10 ||
+                (pl_orig.points[i].tag & 0x30) == 0x00)) {
+                valid_num++;
+
+                pl_full[i].x = pl_orig.points[i].x;
+                pl_full[i].y = pl_orig.points[i].y;
+                pl_full[i].z = pl_orig.points[i].z;
+                pl_full[i].intensity = pl_orig.points[i].intensity;
+                pl_full[i].curvature =
+                    (pl_orig.points[i].timestamp - pl_orig.points[0].timestamp) *
+                    1.e-6f;  // use curvature as time of each laser points,
+                                    // curvature unit: ms
+
+                if (valid_num % point_filter_num == 0) continue;
+
+                double range = pl_full.points[i].x * pl_full.points[i].x +
+                            pl_full.points[i].y * pl_full.points[i].y +
+                            pl_full.points[i].z * pl_full.points[i].z;
+
+                if (range < (blind * blind)) continue;
+
+                if ((abs(pl_full[i].x - pl_full[i - 1].x) > 1e-7) ||
+                    (abs(pl_full[i].y - pl_full[i - 1].y) > 1e-7) ||
+                    (abs(pl_full[i].z - pl_full[i - 1].z) > 1e-7)) {
+                pl_surf.push_back(std::move(pl_full[i]));
+                }
+            }
+        }
     }else{
         cout << BOLDRED << "Wrong LiDAR Type!!!" << endl;
         return;

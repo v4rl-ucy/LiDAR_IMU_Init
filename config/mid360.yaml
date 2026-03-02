@@ -5,7 +5,7 @@
             imu_topic:  "/eagle/mavros/imu/data_raw"
 
         preprocess:
-            lidar_type: 1                # Livox series LiDAR
+            lidar_type: 7                # 1: Avia, 2: Velodyne, 3: Ouster, 4: L515, 5: Pandar, 6: Robosense, 7: Mid360
             feature_extract_en: false
             scan_line: 6
             blind: 1.0

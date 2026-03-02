@@ -115,6 +115,30 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(robosense_ros::Point,
                                           (double, timestamp, timestamp)
 )
 
+namespace livox_ros 
+{
+struct EIGEN_ALIGN16 LivoxPointXYZRTLT {
+  float x;              /**< X axis, Unit:m */
+  float y;              /**< Y axis, Unit:m */
+  float z;              /**< Z axis, Unit:m */
+  float intensity; /**< Reflectivity   */
+  uint8_t tag;          /**< Livox point tag   */
+  uint8_t line;         /**< Laser line id     */
+  double timestamp; /**< Time offset, Unit:ns */
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
+}  // namespace livox_ros
+
+POINT_CLOUD_REGISTER_POINT_STRUCT(livox_ros::LivoxPointXYZRTLT,
+                                  (float, x, x)
+                                  (float, y, y)
+                                  (float, z, z)
+                                  (float, intensity, intensity)
+                                  (uint8_t, tag, tag)
+                                  (uint8_t, line, line)
+                                  (double, timestamp, timestamp)
+)
+
 class Preprocess
 {
   public:
