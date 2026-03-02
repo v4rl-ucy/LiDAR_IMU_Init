@@ -69,8 +69,24 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(Ceres REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED COMPONENTS common io)
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 if (USE_LIVOX)
   find_package(livox_ros_driver2 REQUIRED)
+endif()
+
+execute_process(
+  COMMAND ${Python3_EXECUTABLE} -c "import numpy, sys; sys.stdout.write(numpy.get_include())"
+  OUTPUT_VARIABLE NUMPY_INCLUDE_DIR
+  RESULT_VARIABLE NUMPY_INCLUDE_RESULT
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+if(NUMPY_INCLUDE_RESULT EQUAL 0 AND EXISTS "${NUMPY_INCLUDE_DIR}/numpy/arrayobject.h")
+  message(STATUS "NumPy C headers found: ${NUMPY_INCLUDE_DIR}")
+  set(HAS_NUMPY_HEADERS TRUE)
+else()
+  message(WARNING "NumPy C headers not found. Building with WITHOUT_NUMPY for matplotlibcpp.")
+  set(HAS_NUMPY_HEADERS FALSE)
 endif()
 
 set(dependencies
@@ -132,13 +148,19 @@ target_include_directories(li_init PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
   $<INSTALL_INTERFACE:include>
   ${PCL_INCLUDE_DIRS}
-  ${PYTHON_INCLUDE_DIRS}
+  ${Python3_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
 )
 
+if(HAS_NUMPY_HEADERS)
+  target_include_directories(li_init PUBLIC ${NUMPY_INCLUDE_DIR})
+else()
+  target_compile_definitions(li_init PUBLIC WITHOUT_NUMPY)
+endif()
+
 target_link_libraries(li_init
   ${PCL_LIBRARIES}
-  ${PYTHON_LIBRARIES}
+  Python3::Python
   ${CERES_LIBRARIES}
   Eigen3::Eigen
   spdlog::spdlog
