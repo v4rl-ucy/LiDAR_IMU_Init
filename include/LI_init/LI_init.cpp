@@ -354,7 +354,8 @@ void LI_Init::solve_Rotation_only() {
 
   ceres::Problem problem_rot;
   problem_rot.AddParameterBlock(R_LI_quat, 4);
-#if CERES_VERSION_MAJOR >= 2
+#if CERES_VERSION_MAJOR > 2 || \
+    (CERES_VERSION_MAJOR == 2 && CERES_VERSION_MINOR >= 1)
   problem_rot.SetManifold(R_LI_quat, new ceres::QuaternionManifold());
 #else
   problem_rot.SetParameterization(R_LI_quat,
@@ -395,7 +396,8 @@ void LI_Init::solve_Rot_bias_gyro(double& timediff_imu_wrt_lidar) {
   ceres::Problem problem_ang_vel;
 
   problem_ang_vel.AddParameterBlock(R_LI_quat, 4);
-#if CERES_VERSION_MAJOR >= 2
+#if CERES_VERSION_MAJOR > 2 || \
+    (CERES_VERSION_MAJOR == 2 && CERES_VERSION_MINOR >= 1)
   problem_ang_vel.SetManifold(R_LI_quat, new ceres::QuaternionManifold());
 #else
   problem_ang_vel.SetParameterization(R_LI_quat,
@@ -467,7 +469,8 @@ void LI_Init::solve_trans_biasacc_grav() {
   ceres::Problem problem_acc;
 
   problem_acc.AddParameterBlock(R_GL0_quat, 4);
-#if CERES_VERSION_MAJOR >= 2
+#if CERES_VERSION_MAJOR > 2 || \
+    (CERES_VERSION_MAJOR == 2 && CERES_VERSION_MINOR >= 1)
   problem_acc.SetManifold(R_GL0_quat, new ceres::QuaternionManifold());
 #else
   problem_acc.SetParameterization(R_GL0_quat,
